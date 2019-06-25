@@ -51,14 +51,14 @@ d3.queue()
 		console.log('countries:', countries);
 
 		var countryData = climateData.filter(d => d.country === 'Australia');
-		graphCountry(countryData);
+		graphCountry(countryData, true);
 		
 		d3.select('select')
 			.on('change', function() {
 				var country = d3.event.target.value;
 				console.log(country);
 				var countryData = climateData.filter(d => d.country === country);
-				graphCountry(countryData);
+				graphCountry(countryData, false);
 			})
 			.selectAll('option')
 			.data(countries)
@@ -70,7 +70,7 @@ d3.queue()
 	});
 
 
-function graphCountry(countryData) {
+function graphCountry(countryData, firstPageLoad) {
 
 	console.log('countryData', countryData);
 	
@@ -99,18 +99,35 @@ function graphCountry(countryData) {
 		.exit()
 		.remove();
 
-	svg
-		.enter()
-		.append('rect')
-		.merge(svg)
-			.attr('width', barWidth)
-			.attr('height', d => {
-				// console.log('yScale value:', yScale(d.value));
-				// console.log('height', height - yScale(d.value));
-				return height - yScale(d.value)})
-			.attr('y', d => yScale(d.value))
-			.attr('x', (d,i) => (barWidth + barPadding) * i)
-			.attr('fill', 'purple');
+ 	if(!firstPageLoad) {
+		svg
+			.enter()
+			.append('rect')
+			.merge(svg)
+				.transition()
+				// .delay((d, i) => i * 30)
+				.attr('width', barWidth)
+				.attr('height', d => {
+					// console.log('yScale value:', yScale(d.value));
+					// console.log('height', height - yScale(d.value));
+					return height - yScale(d.value)})
+				.attr('y', d => yScale(d.value))
+				.attr('x', (d,i) => (barWidth + barPadding) * i)
+				.attr('fill', 'purple');
+	} else {
+		svg
+			.enter()
+			.append('rect')
+			.merge(svg)
+				.attr('width', barWidth)
+				.attr('height', d => {
+					// console.log('yScale value:', yScale(d.value));
+					// console.log('height', height - yScale(d.value));
+					return height - yScale(d.value)})
+				.attr('y', d => yScale(d.value))
+				.attr('x', (d,i) => (barWidth + barPadding) * i)
+				.attr('fill', 'purple');
+	}
 			
 }
 
