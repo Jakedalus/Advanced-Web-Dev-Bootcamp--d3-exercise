@@ -1,4 +1,6 @@
-
+var height = 500;
+var width = 500;
+var padding = 50;
 
 
 
@@ -37,9 +39,7 @@ d3.queue()
 		
 		console.log(climateData);
 	
-		var height = 500;
-		var width = 500;
-		var padding = 50;
+		
 
 		var countries = climateData.reduce((acc, next) => {
 			// console.log('acc', acc);
@@ -50,38 +50,16 @@ d3.queue()
 
 		console.log('countries:', countries);
 
-		var ausData = climateData.filter(d => d.country === 'Australia');
-
-		console.log(ausData);
-
-		var numBars = ausData.length;
-		var barPadding = 10;
-		var barWidth = (width / numBars) - barPadding;
-
-		var yScale = d3.scaleLinear()
-						.domain(d3.extent(ausData, d => d.value))
-						.range([height - padding, padding]);
-
-		var xScale = d3.scaleLinear()
-						.domain(d3.extent(ausData, d => d.year))
-						.range([padding, width - padding]);
-
-		var svg = d3.select('svg')
-					.attr('width', width)
-					.attr('height', height);
-
-		svg
-			.selectAll('rect')
-			.data(ausData)
-			.enter()
-			.append('rect')
-				.attr('width', barWidth)
-				.attr('height', d => height - yScale(d.value))
-				.attr('y', d => yScale(d.value))
-				.attr('x', (d,i) => (barWidth + barPadding) * i)
-				.attr('fill', 'purple');
+		var countryData = climateData.filter(d => d.country === 'Australia');
+		graphCountry(countryData);
 		
 		d3.select('select')
+			.on('change', function() {
+				var country = d3.event.target.value;
+				console.log(country);
+				var countryData = climateData.filter(d => d.country === country);
+				graphCountry(countryData);
+			})
 			.selectAll('option')
 			.data(countries)
 			.enter()
@@ -90,4 +68,56 @@ d3.queue()
 
 	
 	});
+
+
+function graphCountry(countryData) {
+
+	console.log('countryData', countryData);
+	
+	var numBars = countryData.length;
+	var barPadding = 10;
+	var barWidth = (width / numBars) - barPadding;
+
+	var yScale = d3.scaleLinear()
+					.domain(d3.extent(countryData, d => +d.value))
+					.range([height - padding, padding]);
+
+	var xScale = d3.scaleLinear()
+					.domain(d3.extent(countryData, d => +d.year))
+					.range([padding, width - padding]);
+
+	console.log('xScale:', xScale.domain(), xScale.range());
+	console.log('yScale:', yScale.domain(), yScale.range());
+
+	var svg = d3.select('svg')
+				.attr('width', width)
+				.attr('height', height)
+				.selectAll('rect')
+				.data(countryData);
+
+	svg
+		.exit()
+		.remove();
+
+	svg
+		.enter()
+		.append('rect')
+		.merge(svg)
+			.attr('width', barWidth)
+			.attr('height', d => {
+				// console.log('yScale value:', yScale(d.value));
+				// console.log('height', height - yScale(d.value));
+				return height - yScale(d.value)})
+			.attr('y', d => yScale(d.value))
+			.attr('x', (d,i) => (barWidth + barPadding) * i)
+			.attr('fill', 'purple');
+			
+}
+
+
+
+
+
+
+
 
