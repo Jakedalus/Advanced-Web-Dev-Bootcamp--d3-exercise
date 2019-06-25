@@ -1,19 +1,9 @@
 
-//d3.xml('UNdata_Export_20190625_212647973.xml', function(error, xml) {
-//	if (error) throw error;
-//	
-//	console.log(xml);
-//	console.log(xml.responseXML);
-//	console.log('what');
-//});
+
+
 
 d3.queue()
 	.defer(d3.xml, './UNdata_Export_20190625_212647973.xml')
-//	,function(row) {
-//		return {
-//			row
-//		}
-//	})
 	.await(function(error, data) {
 		if (error) throw error;
 		
@@ -47,31 +37,42 @@ d3.queue()
 		
 		console.log(climateData);
 	
+		var height = 500;
+		var width = 500;
+		var padding = 50;
+
+		var ausData = climateData.filter(d => d.country === 'Australia');
+
+		console.log(ausData);
+
+		var numBars = ausData.length;
+		var barPadding = 10;
+		var barWidth = (width / numBars) - barPadding;
+
+		var yScale = d3.scaleLinear()
+						.domain(d3.extent(ausData, d => d.value))
+						.range([height - padding, padding]);
+
+		var xScale = d3.scaleLinear()
+						.domain(d3.extent(ausData, d => d.year))
+						.range([padding, width - padding]);
+
+		var svg = d3.select('svg')
+					.attr('width', width)
+					.attr('height', height);
+
+		svg
+			.selectAll('rect')
+			.data(ausData)
+			.enter()
+			.append('rect')
+				.attr('width', barWidth)
+				.attr('height', d => height - yScale(d.value))
+				.attr('y', d => yScale(d.value))
+				.attr('x', (d,i) => (barWidth + barPadding) * i)
+				.attr('fill', 'purple');
 		
-	
-//		var data = countries.geonames.map(country => {
-//			country.cities = cities.filter(city => city.countryCode === country.countryCode);
-//			return country;
-//		});
-//	
-//		var countrySelection = d3.select('body')
-//			.selectAll('div')
-//			.data(data)
-//			.enter()
-//			.append('div');
-//	
-//		countrySelection
-//			.append('h3')
-//				.text(d => d.countryName);
-//	
-//		countrySelection
-//			.append('ul')
-//			.html(d => d.cities.map(city => {
-//				var percentage = (city.population / d.population) *100;
-//				return `<li>${city.cityName} - ${percentage.toFixed(2)}%</li>`;
-//			}).join(''));
 	
 	
 	});
-//
-//
+
