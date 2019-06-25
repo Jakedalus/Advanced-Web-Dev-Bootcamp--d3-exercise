@@ -41,6 +41,15 @@ d3.queue()
 		var width = 500;
 		var padding = 50;
 
+		var countries = climateData.reduce((acc, next) => {
+			// console.log('acc', acc);
+			// console.log('next', next);
+			if (acc.indexOf(next.country) === -1) acc.push(next.country);
+			return acc;
+		}, []);
+
+		console.log('countries:', countries);
+
 		var ausData = climateData.filter(d => d.country === 'Australia');
 
 		console.log(ausData);
@@ -72,7 +81,13 @@ d3.queue()
 				.attr('x', (d,i) => (barWidth + barPadding) * i)
 				.attr('fill', 'purple');
 		
-	
+		d3.select('select')
+			.selectAll('option')
+			.data(countries)
+			.enter()
+			.append('option')
+				.text(d => d);
+
 	
 	});
 
