@@ -66,6 +66,7 @@ d3.queue()
 			.append('option')
 				.text(d => d);
 
+
 	
 	});
 
@@ -86,23 +87,84 @@ function graphCountry(countryData, firstPageLoad) {
 					.domain(d3.extent(countryData, d => +d.year))
 					.range([padding, width - padding]);
 
+	var xAxis = d3.axisBottom(xScale)
+					.tickSize(-height + (2 * padding))
+					.tickSizeOuter(0);
+
+	var yAxis = d3.axisLeft(yScale)
+					.tickSize(-width + (2 * padding))
+					.tickSizeOuter(0);
+
 	console.log('xScale:', xScale.domain(), xScale.range());
 	console.log('yScale:', yScale.domain(), yScale.range());
 
 	var svg = d3.select('svg')
 				.attr('width', width)
-				.attr('height', height)
-				.selectAll('rect')
-				.data(countryData);
+				.attr('height', height);
 
 	svg
+	  .append('g')
+	  .attr('transform', `translate(0, ${height - padding})`)
+	  .call(xAxis);
+
+	svg
+	  .append('g')
+	  .attr('transform', `translate(${padding}, 0)`)
+	  .call(yAxis);
+
+	//title
+	svg
+		.append('text')
+			.attr('x', width / 2)
+			.attr('y', height - padding)
+			.attr('dy', '1.5em')
+			.style('text-anchor', 'middle')
+			.text('Greenhouse Gas (GHGs) Emissions without Land Use, Land-Use Change and Forestry (LULUCF), in kilotonne CO2 equivalent');
+
+	//x-axis label
+	svg
+	  .append('text')
+	    .attr('x', width / 2)
+	    .attr('y', height - padding)
+	    .attr('dy', '1.5em')
+	    .style('text-anchor', 'middle')
+	    .text('Year');
+			
+	//y-axis label
+	svg
+	  .append('text')
+	    .attr('transform', 'rotate(-90)')
+	    .attr('x', -height / 2)
+	    .attr('y', padding)
+	    .attr('dy', '-1.1em')
+	    .style('text-anchor', 'middle')
+	    .text('Greenhouse Gas (GHGs) Emissions  in kilotonne CO2 equivalent');
+
+
+
+	var update = svg
+			.selectAll('rect')
+			.data(countryData);
+			// .on('mousemove', showTooltip)
+			// .on('mouseout', hideTooltip)
+			// .on('touchstart', showTooltip)
+			// .on('touchend', hideTooltip);
+
+	
+
+
+	update
 		.exit()
 		.remove();
 
+	
+
  	if(!firstPageLoad) {
-		svg
+		update
 			.enter()
 			.append('rect')
+				.on('mousemove touchmove', showTooltip)
+        .on('mouseout touchend', hideTooltip)
 			.merge(svg)
 				.transition()
 				// .delay((d, i) => i * 30)
@@ -113,24 +175,48 @@ function graphCountry(countryData, firstPageLoad) {
 					return height - yScale(d.value)})
 				.attr('y', d => yScale(d.value))
 				.attr('x', (d,i) => (barWidth + barPadding) * i)
-				.attr('fill', 'purple');
+				.attr('fill', 'red');
 	} else {
-		svg
+		update
 			.enter()
 			.append('rect')
+				.on('mousemove touchmove', showTooltip)
+        .on('mouseout touchend', hideTooltip)
 			.merge(svg)
 				.attr('width', barWidth)
 				.attr('height', d => {
+					console.log('d:', d);
 					// console.log('yScale value:', yScale(d.value));
 					// console.log('height', height - yScale(d.value));
-					return height - yScale(d.value)})
+					return height - yScale(d.value)
+				})
 				.attr('y', d => yScale(d.value))
 				.attr('x', (d,i) => (barWidth + barPadding) * i)
-				.attr('fill', 'purple');
+				.attr('fill', 'green');
+
+
 	}
-			
+
+	
 }
 
+function showTooltip(d) {
+	console.log('showTooltip');
+	var tooltip = d3.select('.tooltip');
+  tooltip
+		.style('opacity', 1)
+		.style('left', `${d3.event.x - tooltip.node().offsetWidth / 2}px`)
+		.style('top', `${d3.event.y - 25}px`)
+		.html(`
+		<p>Year: ${d.year}</p>
+		<p>Value: ${d.value.toLocaleString()}</p>
+		`);
+}
+
+function hideTooltip() {
+	d3.select('.tooltip')
+		.style('opacity', 0);
+}
 
 
 
