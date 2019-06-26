@@ -1,19 +1,18 @@
-var height = 500;
-var width = 500;
-var padding = 50;
-
-
 
 d3.queue()
 	.defer(d3.xml, './UNdata_Export_20190625_212647973.xml')
 	.await(function(error, data) {
 		if (error) throw error;
+
+		var height = 700;
+		var width = 700;
+		var padding = 100;
 		
-		console.log(data, typeof data);
+		// console.log(data, typeof data);
 	
 		var records = Array.from(data.getElementsByTagName('record'));
 	
-		console.log(records, typeof records, Array.isArray(records));
+		// console.log(records, typeof records, Array.isArray(records));
 		
 		var climateData = [];
 	
@@ -71,29 +70,29 @@ d3.queue()
 
 		svg
 		  .append('g')
-		  .attr('transform', `translate(0, ${height - padding})`)
+		  .attr('transform', `translate(0, ${width - padding + 30})`)
 		  .classed('x-axis', true);
 
 		svg
 		  .append('g')
-		  .attr('transform', `translate(${padding}, 0)`)
+		  .attr('transform', `translate(${padding - 30}, 0)`)
 		  .classed('y-axis', true);
 
 		//title
 		svg
 			.append('text')
 				.attr('x', width / 2)
-				.attr('y', height - padding)
-				.attr('dy', '1.5em')
+				.attr('y', 50)
+				// .attr('dy', '-1.5em')
 				.style('text-anchor', 'middle')
-				.text('Greenhouse Gas (GHGs) Emissions without Land Use, Land-Use Change and Forestry (LULUCF), in kilotonne CO2 equivalent');
+				.text('Greenhouse Gas (GHGs) Emissions without Land Use, Land-Use Change and Forestry (LULUCF)');
 
 		//x-axis label
 		svg
 		  .append('text')
 		    .attr('x', width / 2)
-		    .attr('y', height - padding)
-		    .attr('dy', '1.5em')
+		    .attr('y', height)
+		    .attr('dy', '-1.5em')
 		    .style('text-anchor', 'middle')
 		    .text('Year');
 				
@@ -101,9 +100,9 @@ d3.queue()
 		svg
 		  .append('text')
 		    .attr('transform', 'rotate(-90)')
-		    .attr('x', -height / 2)
-		    .attr('y', padding)
-		    .attr('dy', '-1.1em')
+		    .attr('x', -width / 2)
+		    .attr('y', '1.5em')
+		    // .attr('dy', '-1.1em')
 		    .style('text-anchor', 'middle')
 		    .text('Greenhouse Gas (GHGs) Emissions  in kilotonne CO2 equivalent');
 
@@ -118,7 +117,7 @@ d3.queue()
 			
 			var numBars = countryData.length;
 			var barPadding = 10;
-			var barWidth = (width / numBars) - barPadding;
+			var barWidth = ((width - padding) / numBars) - barPadding;
 
 			var yScale = d3.scaleLinear()
 							.domain(d3.extent(countryData, d => +d.value))
@@ -133,17 +132,17 @@ d3.queue()
 							.tickSizeOuter(0);
 
 			var yAxis = d3.axisLeft(yScale)
-							.tickSize(-width + (2 * padding))
+							.tickSize(-width + (1.5 * padding))
 							.tickSizeOuter(0);
 
 			console.log('xScale:', xScale.domain(), xScale.range());
 			console.log('yScale:', yScale.domain(), yScale.range());
 
 			d3.select('.x-axis')
-          .call(d3.axisBottom(xScale));
+          .call(xAxis);
 
       d3.select('.y-axis')
-          .call(d3.axisLeft(yScale));
+          .call(yAxis);
 
 			var update = svg
 					.selectAll('rect')
@@ -171,14 +170,21 @@ d3.queue()
 					.merge(update)
 						.transition()
 						// .delay((d, i) => i * 30)
-						.attr('width', barWidth)
+						.attr('width', d =>{ 	
+							console.log('d', d);
+
+							return barPadding})
 						.attr('height', d => {
 							// console.log('yScale value:', yScale(d.value));
-							// console.log('height', height - yScale(d.value));
+							console.log('height', height - yScale(d.value));
 							return height - yScale(d.value)})
-						.attr('y', d => yScale(d.value))
-						.attr('x', (d,i) => (barWidth + barPadding) * i)
-						.attr('fill', 'red');
+						.attr('y', d => {
+							console.log('d.value', d.value, yScale(d.value));
+							return yScale(d.value) - 70})
+						.attr('x', (d,i) => {
+							console.log('d.year', d, d.year, xScale(d.year));
+							return xScale(d.year)})
+						.attr('fill', 'purple');
 			} else {
 				update
 					.enter()
@@ -186,16 +192,21 @@ d3.queue()
 						.on('mousemove touchmove', showTooltip)
 		        .on('mouseout touchend', hideTooltip)
 					.merge(update)
-						.attr('width', barWidth)
+						.attr('width', d =>{ 	
+							console.log('d', d);
+
+							return barPadding})
 						.attr('height', d => {
-							console.log('d:', d);
 							// console.log('yScale value:', yScale(d.value));
-							// console.log('height', height - yScale(d.value));
-							return height - yScale(d.value)
-						})
-						.attr('y', d => yScale(d.value))
-						.attr('x', (d,i) => (barWidth + barPadding) * i)
-						.attr('fill', 'green');
+							console.log('height', height - yScale(d.value));
+							return height - yScale(d.value)})
+						.attr('y', d => {
+							console.log('d.value', d.value, yScale(d.value));
+							return yScale(d.value) - 70})
+						.attr('x', (d,i) => {
+							console.log('d.year', d, d.year, xScale(d.year));
+							return xScale(d.year) - (barWidth)/2.5})
+						.attr('fill', 'purple');
 
 
 			}
