@@ -49,6 +49,22 @@ d3.queue()
 
 		console.log('countries:', countries);
 
+		var yScale = d3.scaleLinear()
+							.domain(d3.extent(climateData, d => +d.value))
+							.range([height - padding, padding]);
+
+		var xScale = d3.scaleLinear()
+						.domain(d3.extent(climateData, d => +d.year))
+						.range([padding, width - padding]);
+
+		var xAxis = d3.axisBottom(xScale)
+						.tickSize(-height + (2 * padding))
+						.tickSizeOuter(0);
+
+		var yAxis = d3.axisLeft(yScale)
+						.tickSize(-width + (1.5 * padding))
+						.tickSizeOuter(0);
+
 		
 		
 		d3.select('select')
@@ -119,21 +135,7 @@ d3.queue()
 			var barPadding = 10;
 			var barWidth = ((width - padding) / numBars) - barPadding;
 
-			var yScale = d3.scaleLinear()
-							.domain(d3.extent(countryData, d => +d.value))
-							.range([height - padding, padding]);
-
-			var xScale = d3.scaleLinear()
-							.domain(d3.extent(countryData, d => +d.year))
-							.range([padding, width - padding]);
-
-			var xAxis = d3.axisBottom(xScale)
-							.tickSize(-height + (2 * padding))
-							.tickSizeOuter(0);
-
-			var yAxis = d3.axisLeft(yScale)
-							.tickSize(-width + (1.5 * padding))
-							.tickSizeOuter(0);
+			
 
 			console.log('xScale:', xScale.domain(), xScale.range());
 			console.log('yScale:', yScale.domain(), yScale.range());
@@ -205,7 +207,7 @@ d3.queue()
 							return yScale(d.value) - 70})
 						.attr('x', (d,i) => {
 							console.log('d.year', d, d.year, xScale(d.year));
-							return xScale(d.year) - (barWidth)/2.5})
+							return xScale(d.year)})
 						.attr('fill', 'purple');
 
 
